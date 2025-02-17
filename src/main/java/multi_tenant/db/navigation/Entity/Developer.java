@@ -15,14 +15,14 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import multi_tenant.db.navigation.Enum.Status;
+import multi_tenant.db.navigation.Enum.Role;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "developers")
+public class Developer {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,19 +39,10 @@ public class User {
 
 	@Enumerated(EnumType.STRING)
 	@Column
-	private UserRole userRole;
-	
-	@Enumerated(EnumType.STRING)
-	@Column
-	private Status status;
+	private Role role;
 
 	@Column(name = "created_at")
 	@CreationTimestamp
 	private LocalDateTime createdAt;
 
-	//set public for Hibernate db mapping 
-	public enum UserRole {
-		 ADMIN, STAFF
-	}
-	
 }
