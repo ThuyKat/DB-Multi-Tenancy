@@ -10,29 +10,23 @@ import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
 import jakarta.transaction.Transactional;
-import multi_tenant.db.navigation.Entity.Tenant;
-import multi_tenant.db.navigation.Repository.TenantRepository;
+import multi_tenant.db.navigation.Entity.Global.Tenant;
+import multi_tenant.db.navigation.Repository.Global.TenantRepository;
 import multi_tenant.db.navigation.Utils.DataSourceUtil;
 import multi_tenant.db.navigation.Utils.MultiTenantDataSource;
 @Service
 public class TenantService {
-	@Autowired
-	private DataSource dataSource;
-	
-	@Autowired
-	private MultiTenantDataSource multiTenantDataSource;
-	
-	@Autowired
-	private TenantRepository tenantRepository;
-	
-	@Autowired
-	private DataSourceUtil dataSourceUtil;
+    private ApplicationContext applicationContext;
+    @Autowired
+    private TenantRepository tenantRepository;
+    @Autowired
+    private DataSourceUtil dataSourceUtil;
+    
+    private DataSource globalDataSource; 
 	
 	public List<Tenant> getAllTenant(){
 		return tenantRepository.findAll();
@@ -41,11 +35,11 @@ public class TenantService {
 		return tenantRepository.findByName(shopName);
 	}
 	
-//	@Transactional //to rollback if error occurs
+	@Transactional //to rollback if error occurs
 	public void createNewTenant(String shopName, Long ownerId) {
 		String databaseName = shopName + "_db";
 		
-		try(Connection connection = dataSource.getConnection()){
+		try(Connection connection = globalDataSource.getConnection()){
 			Statement statement = connection.createStatement();
 			connection.setAutoCommit(false);
 			
@@ -70,12 +64,12 @@ public class TenantService {
 					.baselineOnMigrate(false)
 					.load();
 			try {
-				flyway.migrate();
+				flyway.migrate(); 
 			}catch (Exception e) {
 				statement.execute("DROP DATABASE " + databaseName);
 				throw new RuntimeException("Flyway migration failed for " + databaseName + ": " + e.getMessage());
 			}			
-			
+			MultiTenantDataSource multiTenantDataSource = applicationContext.getBean(MultiTenantDataSource.class);
 			multiTenantDataSource.addDataSource(databaseName, tenantDataSource);
 			
 			connection.commit();			
