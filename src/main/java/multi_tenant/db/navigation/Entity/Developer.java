@@ -21,7 +21,7 @@ import multi_tenant.db.navigation.Enum.Role;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "developers")
+@Table(name = "developers", schema = "global_multi_tenant")
 public class Developer {
 
 	@Id

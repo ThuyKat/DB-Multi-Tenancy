@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tenants")
+@Table(name = "tenants", schema = "global_multi_tenant")
 public class Tenant {
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)

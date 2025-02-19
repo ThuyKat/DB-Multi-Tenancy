@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "owners")
+@Table(name = "owners", schema = "global_multi_tenant")
 public class Owner {
 
 	@Id
