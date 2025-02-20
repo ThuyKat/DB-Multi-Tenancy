@@ -6,8 +6,8 @@ public class TenantContext {
 	public static String getCurrentTenant() {
 		return CURRENT_TENANT.get();
 	}
-	public static void setCurrentTenant(String tenant) {
-		CURRENT_TENANT.set(tenant);
+	public static void setCurrentTenant(String databaseName) {
+		CURRENT_TENANT.set(databaseName);
 	}
 	
 	public static void clear() {

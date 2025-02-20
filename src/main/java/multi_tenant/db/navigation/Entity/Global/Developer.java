@@ -1,4 +1,4 @@
-package multi_tenant.db.navigation.Entity;
+package multi_tenant.db.navigation.Entity.Global;
 
 import java.time.LocalDateTime;
 
@@ -11,42 +11,38 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import multi_tenant.db.navigation.Enum.Role;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tenants", schema = "global_multi_tenant")
-public class Tenant {
+@Table(name = "developers", schema = "global_multi_tenant")
+public class Developer {
+
 	@Id
-	@GeneratedValue (strategy = GenerationType.IDENTITY)
-	private Long id;	
-	
-	@Column (nullable = false, unique = true, length = 45) 
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column(nullable = false, unique = true, length = 45)
 	private String name;
-	
-	@Column(name="db_name", nullable = false, unique = true, length = 45)
-	private String dbName;
-	
+
+	@Column(nullable = false, unique = true, length = 100)
+	private String email;
+
+	@Column(nullable = false, length = 255)
+	private String password;
+
 	@Enumerated(EnumType.STRING)
 	@Column
-	private Status status;
-	
+	private Role role;
+
 	@Column(name = "created_at")
 	@CreationTimestamp
 	private LocalDateTime createdAt;
-	
-	@ManyToOne
-	@JoinColumn(name="owner_id")
-	private Owner owner;
-	
-	public enum Status{
-		ACTIVE, DISABLE
-	}
+
 }

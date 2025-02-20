@@ -1,4 +1,4 @@
-package multi_tenant.db.navigation.Entity;
+package multi_tenant.db.navigation.Entity.Global;
 
 
 
