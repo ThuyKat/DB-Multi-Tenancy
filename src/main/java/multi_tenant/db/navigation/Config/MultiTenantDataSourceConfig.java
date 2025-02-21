@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -18,6 +20,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import jakarta.persistence.EntityManagerFactory;
+import multi_tenant.db.navigation.Controller.UserController;
 import multi_tenant.db.navigation.Entity.Global.Tenant;
 import multi_tenant.db.navigation.Service.TenantService;
 import multi_tenant.db.navigation.Utils.DataSourceUtil;
@@ -33,21 +36,23 @@ public class MultiTenantDataSourceConfig {
 
 	@Autowired
 	private DataSourceUtil dataSourceUtil;
-
+	private static final Logger logger = LoggerFactory.getLogger(MultiTenantDataSourceConfig.class);
 	@Bean
 	public TenantRoutingDataSource multiTenantDataSource() {
 		TenantRoutingDataSource tenantRoutingDataSource = new TenantRoutingDataSource();
 		Map<Object, Object> dataSourceMap = new HashMap<>();
 
 		List<Tenant> tenants = tenantService.getAllTenant();
+		
 		if (tenants.isEmpty()) {
 			System.out.print("No tenant found");
 		} else {
 			for (Tenant tenant : tenants) {
+				System.out.println(tenant.getDbName());
 				dataSourceMap.put(tenant.getDbName(), dataSourceUtil.createDataSource(tenant.getDbName()));
 			}
 		}
-
+		
 		DataSource defaultDataSource = dataSourceUtil.createDataSource("global_multi_tenant");
 		dataSourceMap.put("default", defaultDataSource);
 
