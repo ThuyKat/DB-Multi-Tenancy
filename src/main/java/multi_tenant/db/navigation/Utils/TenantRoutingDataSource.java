@@ -8,7 +8,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
 
-public class MultiTenantDataSource extends AbstractRoutingDataSource{
+public class TenantRoutingDataSource extends AbstractRoutingDataSource{
 	private final Map<Object, Object> dataSourceMap = new ConcurrentHashMap<>();
 		
 	@Override
@@ -18,8 +18,9 @@ public class MultiTenantDataSource extends AbstractRoutingDataSource{
 	}
 
 	//hibernate
+	// avoid null pointer execption if databaseName not exist
 	public DataSource getDataSource(String databaseName) {
-		return (DataSource) dataSourceMap.get(databaseName); //return value: dataSource
+		return (DataSource) dataSourceMap.getOrDefault(databaseName, getDefaultDataSource()); //return value: dataSource
 	}
 	//hibernate
 	public DataSource getDefaultDataSource() {
@@ -27,8 +28,10 @@ public class MultiTenantDataSource extends AbstractRoutingDataSource{
 	}
 	
     public void addDataSource(String databaseName, DataSource dataSource) {
-        dataSourceMap.put(databaseName, dataSource);        
-        setTargetDataSources(dataSourceMap);
-        afterPropertiesSet(); // Reload data sources dynamically
+    	if(!dataSourceMap.containsKey(databaseName)) {
+    		  dataSourceMap.put(databaseName, dataSource);        
+    	        setTargetDataSources(dataSourceMap);
+    	        afterPropertiesSet(); // Reload data sources dynamically
+    	}      
     }
 }

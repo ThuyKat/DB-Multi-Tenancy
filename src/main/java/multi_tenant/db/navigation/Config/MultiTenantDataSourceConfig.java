@@ -21,58 +21,55 @@ import jakarta.persistence.EntityManagerFactory;
 import multi_tenant.db.navigation.Entity.Global.Tenant;
 import multi_tenant.db.navigation.Service.TenantService;
 import multi_tenant.db.navigation.Utils.DataSourceUtil;
-import multi_tenant.db.navigation.Utils.MultiTenantDataSource;
+import multi_tenant.db.navigation.Utils.TenantRoutingDataSource;
 
 @Configuration
 @DependsOn("globalEntityManagerFactory") // Đảm bảo Global DB khởi tạo trước
-@EnableJpaRepositories(
-    basePackages = "multi_tenant.db.navigation.Repository.Tenant",
-    entityManagerFactoryRef = "tenantEntityManagerFactory",
-    transactionManagerRef = "tenantTransactionManager"
-)
+@EnableJpaRepositories(basePackages = "multi_tenant.db.navigation.Repository.Tenant", entityManagerFactoryRef = "tenantEntityManagerFactory", transactionManagerRef = "tenantTransactionManager")
 public class MultiTenantDataSourceConfig {
 
-    @Autowired
-    private TenantService tenantService;
+	@Autowired
+	private TenantService tenantService;
 
-    @Autowired
-    private DataSourceUtil dataSourceUtil;
+	@Autowired
+	private DataSourceUtil dataSourceUtil;
 
-    @Bean
-    public DataSource multiTenantDataSource() {
-        MultiTenantDataSource multiTenantDataSource = new MultiTenantDataSource();
-        Map<Object, Object> dataSourceMap = new HashMap<>();
+	@Bean
+	public TenantRoutingDataSource multiTenantDataSource() {
+		TenantRoutingDataSource tenantRoutingDataSource = new TenantRoutingDataSource();
+		Map<Object, Object> dataSourceMap = new HashMap<>();
 
-        List<Tenant> tenants = tenantService.getAllTenant();
-        for (Tenant tenant : tenants) {
-            dataSourceMap.put(tenant.getDbName(), dataSourceUtil.createDataSource(tenant.getDbName()));
-        }
+		List<Tenant> tenants = tenantService.getAllTenant();
+		if (tenants.isEmpty()) {
+			System.out.print("No tenant found");
+		} else {
+			for (Tenant tenant : tenants) {
+				dataSourceMap.put(tenant.getDbName(), dataSourceUtil.createDataSource(tenant.getDbName()));
+			}
+		}
 
-        DataSource defaultDataSource = dataSourceUtil.createDataSource("global_multi_tenant");
-        dataSourceMap.put("default", defaultDataSource);
+		DataSource defaultDataSource = dataSourceUtil.createDataSource("global_multi_tenant");
+		dataSourceMap.put("default", defaultDataSource);
 
-        multiTenantDataSource.setTargetDataSources(dataSourceMap);
-        multiTenantDataSource.setDefaultTargetDataSource(defaultDataSource);
-        multiTenantDataSource.afterPropertiesSet();
-        
-        System.out.println("default" + dataSourceMap.get("default"));
-        return multiTenantDataSource;
-    }
+		tenantRoutingDataSource.setTargetDataSources(dataSourceMap);
+		tenantRoutingDataSource.setDefaultTargetDataSource(defaultDataSource);
+		tenantRoutingDataSource.afterPropertiesSet();
 
-    @Bean(name = "tenantEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean tenantEntityManagerFactory(
-            EntityManagerFactoryBuilder builder,
-            DataSource multiTenantDataSource) {
-        return builder
-                .dataSource(multiTenantDataSource)
-                .packages("multi_tenant.db.navigation.Entity.Tenant") //  Chỉ định package chứa entity của Tenant DB
-                .persistenceUnit("tenantPU")
-                .build();
-    }
+		System.out.println("default" + dataSourceMap.get("default"));
+		
+		return tenantRoutingDataSource;
+	}
 
-    @Bean(name = "tenantTransactionManager")
-    public PlatformTransactionManager tenantTransactionManager(
-            @Qualifier("tenantEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
-    }
+	@Bean(name = "tenantEntityManagerFactory")
+	public LocalContainerEntityManagerFactoryBean tenantEntityManagerFactory(EntityManagerFactoryBuilder builder,
+			DataSource multiTenantDataSource) {
+		return builder.dataSource(multiTenantDataSource).packages("multi_tenant.db.navigation.Entity.Tenant") 																												
+				.persistenceUnit("tenantPU").build();
+	}
+
+	@Bean(name = "tenantTransactionManager")
+	public PlatformTransactionManager tenantTransactionManager(
+			@Qualifier("tenantEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+		return new JpaTransactionManager(entityManagerFactory);
+	}
 }

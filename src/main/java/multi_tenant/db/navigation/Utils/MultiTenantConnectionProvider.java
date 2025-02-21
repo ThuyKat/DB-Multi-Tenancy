@@ -9,18 +9,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class MultiTenantConnectionProvider extends AbstractDataSourceBasedMultiTenantConnectionProviderImpl{
 	@Autowired
-	private MultiTenantDataSource multiTenantDataSource;
+	private TenantRoutingDataSource tenantRoutingDataSource;
 	
 	@Override
 	protected DataSource selectAnyDataSource() {
-		return multiTenantDataSource.getDefaultDataSource();
+		return tenantRoutingDataSource.getDefaultDataSource();
 	}
 	
 
 	@Override
 	protected DataSource selectDataSource(Object tenantIdentifier) {
 		String currentTenant = TenantContext.getCurrentTenant();
-		return multiTenantDataSource.getDataSource(currentTenant);
+		return tenantRoutingDataSource.getDataSource(currentTenant);
 	}
 
 }
