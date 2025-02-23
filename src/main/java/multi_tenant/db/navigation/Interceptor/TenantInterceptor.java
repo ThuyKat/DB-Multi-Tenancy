@@ -15,6 +15,7 @@ import multi_tenant.db.navigation.Utils.TenantContext;
 public class TenantInterceptor implements HandlerInterceptor{
 	@Autowired
 	private TenantService tenantService;
+	
 	private static final Logger logger = LoggerFactory.getLogger(TenantInterceptor.class);
 	
 	@Override 
@@ -24,9 +25,12 @@ public class TenantInterceptor implements HandlerInterceptor{
 		if(shopName != null) {
 			String databaseName = tenantService.getDatabaseNameByShopId(shopName).getDbName();
 			TenantContext.setCurrentTenant(databaseName);
+			
 			logger.info("Tenant set to: {}", databaseName);
 		}else {
 			logger.warn("Shop-name header is missing");
+			TenantContext.setCurrentTenant("default");
+			TenantContext.clear();
 		}
 		return true;
 	}
@@ -34,5 +38,6 @@ public class TenantInterceptor implements HandlerInterceptor{
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         TenantContext.clear();
     }
+
 	
 }

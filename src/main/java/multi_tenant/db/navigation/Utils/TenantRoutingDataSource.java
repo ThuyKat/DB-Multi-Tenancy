@@ -7,31 +7,37 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
-
-public class TenantRoutingDataSource extends AbstractRoutingDataSource{
+//extends from parent abstract: AbstractDataSource - getConnection()
+public class TenantRoutingDataSource extends AbstractRoutingDataSource {
 	private final Map<Object, Object> dataSourceMap = new ConcurrentHashMap<>();
-		
+
 	@Override
-	protected Object determineCurrentLookupKey() {	
+	protected Object determineCurrentLookupKey() {
+		// dbName
 		String tenant = TenantContext.getCurrentTenant();
+		System.out.println("Current Tenant in RoutingDataSource: " + (tenant != null ? tenant : "default"));
+		System.out.println("Available DataSource: " + dataSourceMap.keySet());
 		return tenant != null ? tenant : "default";
 	}
 
-	//hibernate
-	// avoid null pointer execption if databaseName not exist
-	public DataSource getDataSource(String databaseName) {
-		return (DataSource) dataSourceMap.getOrDefault(databaseName, getDefaultDataSource()); //return value: dataSource
+	public void addDataSource(String databaseName, DataSource dataSource) {
+		if (!dataSourceMap.containsKey(databaseName)) {
+			this.dataSourceMap.put(databaseName, dataSource);
+			super.setTargetDataSources(dataSourceMap);
+			super.afterPropertiesSet(); // Reload data sources dynamically
+			System.out.println("DataSourceMap size: " + dataSourceMap.size());
+
+		}
 	}
-	//hibernate
-	public DataSource getDefaultDataSource() {
-		return (DataSource) dataSourceMap.get("default"); //datasource of global db
-	}
-	
-    public void addDataSource(String databaseName, DataSource dataSource) {
-    	if(!dataSourceMap.containsKey(databaseName)) {
-    		  dataSourceMap.put(databaseName, dataSource);        
-    	        setTargetDataSources(dataSourceMap);
-    	        afterPropertiesSet(); // Reload data sources dynamically
-    	}      
-    }
 }
+//TenantRoutingDataSource.getConnection():
+//public Connection getConnection() {
+//return determineTargetDataSource().getConnection(); //dataSource.getConnection();
+//}
+//protected DataSource determineTargetDataSource() {
+//    Object lookupKey = determineCurrentLookupKey(); // Get tenant ID
+//    DataSource dataSource = this.resolvedDataSources.get(lookupKey);
+//    return (dataSource != null) ? dataSource : this.resolvedDefaultDataSource;
+//}
+
+
