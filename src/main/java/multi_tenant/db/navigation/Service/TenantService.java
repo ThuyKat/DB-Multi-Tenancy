@@ -11,9 +11,9 @@ import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import multi_tenant.db.navigation.Entity.Global.Tenant;
@@ -23,7 +23,7 @@ import multi_tenant.db.navigation.Utils.TenantRoutingDataSource;
 
 @Service
 public class TenantService {
-    private ApplicationContext applicationContext;
+  
     @Autowired
     private TenantRepository tenantRepository;
     @Autowired
@@ -44,7 +44,7 @@ public class TenantService {
 		return tenantRepository.findByName(shopName);
 	}
 	
-	@Transactional(transactionManager = "globalTransactionManager") //to rollback if error occurs
+	@Transactional(transactionManager = "globalTransactionManager", propagation = Propagation.REQUIRES_NEW) //to rollback if error occurs
 	public void saveTenantToGlobalDB(String shopName, Long ownerId, String databaseName) {	
 		
 		try(Connection connection = globalDataSource.getConnection()){			
