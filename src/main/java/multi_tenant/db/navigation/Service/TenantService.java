@@ -91,7 +91,7 @@ public class TenantService {
 			}			
 			
 			// TenantRoutingDataSource tenantRoutingDataSource = applicationContext.getBean(MultiTenantDataSource.class);
-			tenantRoutingDataSource.addDataSource(databaseName, tenantDataSource);
+//			tenantRoutingDataSource.addDataSource(databaseName, tenantDataSource);
 			
 			connection.commit();			
 					

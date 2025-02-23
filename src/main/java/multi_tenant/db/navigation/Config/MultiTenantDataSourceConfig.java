@@ -47,7 +47,7 @@ public class MultiTenantDataSourceConfig {
 		tenantRoutingDataSource.addDataSource("default", dataSourceUtil.createDataSource("global_multi_tenant"));
 		
 		//add tenant DataSource List
-		List<Tenant> tenants = tenantService.getAllTenant();		
+		/* List<Tenant> tenants = tenantService.getAllTenant();		
 		if (tenants.isEmpty()) {
 			logger.info("No tenant found");
 		} else {
@@ -56,7 +56,8 @@ public class MultiTenantDataSourceConfig {
 				tenantRoutingDataSource
 				.addDataSource(tenant.getDbName(), dataSourceUtil.createDataSource(tenant.getDbName()));				
 			}
-		}				
+		}		
+		*/		
 		return tenantRoutingDataSource;
 	}
 
