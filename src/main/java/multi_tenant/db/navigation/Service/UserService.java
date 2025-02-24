@@ -13,8 +13,8 @@ public class UserService {
 	@Autowired
 	private UserRepository userRespository;
 	
-//	@Transactional(transactionManager = "tenantTransactionManager, propagation = Propagation.REQUIRES_NEW")
+//	@Transactional(transactionManager = "tenantTransactionManager")
 	public User getUserByEmail(String email) {
-		return userRespository.findByEmail(email);
+		return userRespository.findByEmailWithPermissions(email);
 	}
 }
