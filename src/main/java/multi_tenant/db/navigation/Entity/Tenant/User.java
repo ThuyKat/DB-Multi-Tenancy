@@ -11,6 +11,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,8 +30,11 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true, length = 45)
-	private String name;
+	@Column(name="first_name",nullable = false, unique = true, length = 45)
+	private String firstName;
+
+	@Column(name="last_name",nullable = false, unique = true, length = 45)
+	private String lastName;
 
 	@Column(nullable = false, unique = true, length = 100)
 	private String email;
@@ -37,9 +42,9 @@ public class User {
 	@Column(nullable = false, length = 255)
 	private String password;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "role")
-	private UserRole userRole;
+	@ManyToOne
+	@JoinColumn(name = "role_id") //have column role_id in users
+	private Role role;
 	
 	@Enumerated(EnumType.STRING)
 	@Column
@@ -48,10 +53,6 @@ public class User {
 	@Column(name = "created_at")
 	@CreationTimestamp
 	private LocalDateTime createdAt;
-
-	//set public for Hibernate db mapping 
-	public enum UserRole {
-		 ADMIN, STAFF
-	}
+	
 	
 }
