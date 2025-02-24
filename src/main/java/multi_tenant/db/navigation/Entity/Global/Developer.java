@@ -3,6 +3,7 @@ package multi_tenant.db.navigation.Entity.Global;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +16,6 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import multi_tenant.db.navigation.Enum.Role;
 
 @Data
 @NoArgsConstructor
@@ -28,9 +28,12 @@ public class Developer {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true, length = 45)
-	private String name;
+	@Column(name="first_name",nullable = false, unique = true, length = 45)
+	private String firstName;
 
+	@Column(name="last_name",nullable = false, unique = true, length = 45)
+	private String lastName;
+	
 	@Column(nullable = false, unique = true, length = 100)
 	private String email;
 
@@ -44,5 +47,12 @@ public class Developer {
 	@Column(name = "created_at")
 	@CreationTimestamp
 	private LocalDateTime createdAt;
-
+	
+	@Column(name = "updated_at")
+	@UpdateTimestamp
+	private LocalDateTime updatedAt;
+	
+	public enum Role {
+		SUPER_ADMIN, ADMIN
+	}
 }
