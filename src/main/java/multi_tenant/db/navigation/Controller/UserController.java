@@ -30,8 +30,8 @@ public class UserController {
 	
 	@GetMapping("/user")
 	public ResponseEntity<Object> getUser(@RequestHeader("shop-name") String shopName, @RequestParam String email ){
-		System.out.println("Shop name: " + shopName);
-		User user = userService.getUserByEmail(email);	
+		System.out.println("Shop name: " + shopName);		
+		User user = userService.getUserByEmailWithPermission(email);	
 		
 		//hibernate proxy, not fully loaded
 		List<String> permissionList = user.getRole().getPermissions()

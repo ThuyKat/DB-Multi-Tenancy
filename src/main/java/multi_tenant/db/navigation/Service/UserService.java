@@ -14,7 +14,11 @@ public class UserService {
 	private UserRepository userRespository;
 	
 //	@Transactional(transactionManager = "tenantTransactionManager")
-	public User getUserByEmail(String email) {
+	public User getUserByEmailWithPermission(String email) {
 		return userRespository.findByEmailWithPermissions(email);
+	}
+	
+	public User getUserByEmail(String email) {
+		return userRespository.findByEmail(email);
 	}
 }
