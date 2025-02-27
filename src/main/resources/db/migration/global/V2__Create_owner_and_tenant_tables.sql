@@ -1,5 +1,5 @@
 -- table: owners
-CREATE TABLE `global_multi_tenant`.`owners` (
+CREATE TABLE `db_navigation_global_multi_tenant`.`owners` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `first_name` VARCHAR(45) NOT NULL,
   `last_name` VARCHAR(45) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE `global_multi_tenant`.`owners` (
   UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE);
   
   -- table: tenants
-  CREATE TABLE `global_multi_tenant`.`tenants` (
+  CREATE TABLE `db_navigation_global_multi_tenant`.`tenants` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `owner_id` BIGINT NOT NULL,
   `owner_role` ENUM('OWNER','ADMIN') NOT NULL DEFAULT 'OWNER',
@@ -28,7 +28,7 @@ CREATE TABLE `global_multi_tenant`.`owners` (
   INDEX `fk_owner_id_idx` (`owner_id` ASC) VISIBLE,
   CONSTRAINT `fk_owner_id`
     FOREIGN KEY (`owner_id`)
-    REFERENCES `global_multi_tenant`.`owners` (`id`)
+    REFERENCES `db_navigation_global_multi_tenant`.`owners` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE);
 

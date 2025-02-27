@@ -34,7 +34,7 @@ public class DataSourceConfig {
     @Bean(name = "globalDataSource")
     @Primary
     public DataSource globalDataSource() {
-        return dataSourceUtil.createDataSource("global_multi_tenant");
+        return dataSourceUtil.createDataSource("db_navigation_global_multi_tenant");
     }
     
     //2 EntityManagerFactoryBuilder

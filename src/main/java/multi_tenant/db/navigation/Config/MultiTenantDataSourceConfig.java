@@ -44,7 +44,7 @@ public class MultiTenantDataSourceConfig {
 		TenantRoutingDataSource tenantRoutingDataSource = new TenantRoutingDataSource();
 		
 		//add default DataSource
-		tenantRoutingDataSource.addDataSource("default", dataSourceUtil.createDataSource("global_multi_tenant"));
+		tenantRoutingDataSource.addDataSource("default", dataSourceUtil.createDataSource("db_navigation_global_multi_tenant"));
 		
 		//add tenant DataSource List
 		/* List<Tenant> tenants = tenantService.getAllTenant();		
