@@ -1,8 +1,9 @@
-package multi_tenant.db.navigation.Entity;
+package multi_tenant.db.navigation.Entity.Global;
 
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,12 +18,13 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import multi_tenant.db.navigation.Enum.Status;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tenants")
+@Table(name = "tenants", schema = "global_multi_tenant")
 public class Tenant {
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -42,11 +44,20 @@ public class Tenant {
 	@CreationTimestamp
 	private LocalDateTime createdAt;
 	
+	@Column(name = "updated_at")
+	@UpdateTimestamp
+	private LocalDateTime updatedAt;
+	
 	@ManyToOne
 	@JoinColumn(name="owner_id")
 	private Owner owner;
 	
-	public enum Status{
-		ACTIVE, DISABLE
+	@Enumerated(EnumType.STRING)
+	@Column (name = "owner_role")
+	private Role role;
+	
+	public enum Role {
+		OWNER, ADMIN
 	}
+	
 }

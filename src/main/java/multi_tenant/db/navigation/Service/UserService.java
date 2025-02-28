@@ -1,5 +1,20 @@
 package multi_tenant.db.navigation.Service;
 
-public class UserService {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import multi_tenant.db.navigation.Entity.Tenant.User;
+import multi_tenant.db.navigation.Repository.Tenant.UserRepository;
+
+@Service
+public class UserService {
+	@Autowired
+	private UserRepository userRespository;
+	
+//	@Transactional(transactionManager = "tenantTransactionManager")
+	public User getUserByEmail(String email) {
+		return userRespository.findByEmailWithPermissions(email);
+	}
 }

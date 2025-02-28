@@ -10,29 +10,32 @@ import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
-import jakarta.transaction.Transactional;
-import multi_tenant.db.navigation.Entity.Tenant;
-import multi_tenant.db.navigation.Repository.TenantRepository;
+import multi_tenant.db.navigation.Entity.Global.Tenant;
+import multi_tenant.db.navigation.Repository.Global.TenantRepository;
 import multi_tenant.db.navigation.Utils.DataSourceUtil;
-import multi_tenant.db.navigation.Utils.MultiTenantDataSource;
+import multi_tenant.db.navigation.Utils.TenantRoutingDataSource;
+
 @Service
 public class TenantService {
-	@Autowired
-	private DataSource dataSource;
-	
-	@Autowired
-	private MultiTenantDataSource multiTenantDataSource;
-	
-	@Autowired
-	private TenantRepository tenantRepository;
-	
-	@Autowired
-	private DataSourceUtil dataSourceUtil;
+  
+    @Autowired
+    private TenantRepository tenantRepository;
+    @Autowired
+    private DataSourceUtil dataSourceUtil;
+    
+    @Autowired
+    @Qualifier("globalDataSource") 
+    private DataSource globalDataSource; 
+    
+    @Autowired
+    @Lazy
+    private TenantRoutingDataSource tenantRoutingDataSource;
 	
 	public List<Tenant> getAllTenant(){
 		return tenantRepository.findAll();
@@ -41,12 +44,10 @@ public class TenantService {
 		return tenantRepository.findByName(shopName);
 	}
 	
-//	@Transactional //to rollback if error occurs
-	public void createNewTenant(String shopName, Long ownerId) {
-		String databaseName = shopName + "_db";
+	@Transactional(transactionManager = "globalTransactionManager", propagation = Propagation.REQUIRES_NEW) //to rollback if error occurs
+	public void saveTenantToGlobalDB(String shopName, Long ownerId, String databaseName) {	
 		
-		try(Connection connection = dataSource.getConnection()){
-			Statement statement = connection.createStatement();
+		try(Connection connection = globalDataSource.getConnection()){			
 			connection.setAutoCommit(false);
 			
 			//Add new tenant to global db: tenants table
@@ -58,6 +59,19 @@ public class TenantService {
 				prepare.setString(4, "ACTIVE");
 				prepare.executeUpdate();
 			}
+			connection.commit();	
+		} catch (SQLException e) {
+            throw new RuntimeException("Error inserting tenant into Global DB: " + e.getMessage());
+        }
+	}
+	public void createNewTenant(String shopName, Long ownerId) {
+			String databaseName = shopName.toLowerCase() + "_db";
+			
+			saveTenantToGlobalDB(shopName, ownerId, databaseName);
+			
+			try(Connection connection = globalDataSource.getConnection()){
+			connection.setAutoCommit(false);
+			Statement statement = connection.createStatement();
 			
 			//Create new tenant db
 			statement.execute("CREATE DATABASE " + databaseName);
@@ -70,13 +84,14 @@ public class TenantService {
 					.baselineOnMigrate(false)
 					.load();
 			try {
-				flyway.migrate();
+				flyway.migrate(); 
 			}catch (Exception e) {
 				statement.execute("DROP DATABASE " + databaseName);
 				throw new RuntimeException("Flyway migration failed for " + databaseName + ": " + e.getMessage());
 			}			
 			
-			multiTenantDataSource.addDataSource(databaseName, tenantDataSource);
+			// TenantRoutingDataSource tenantRoutingDataSource = applicationContext.getBean(MultiTenantDataSource.class);
+//			tenantRoutingDataSource.addDataSource(databaseName, tenantDataSource);
 			
 			connection.commit();			
 					
