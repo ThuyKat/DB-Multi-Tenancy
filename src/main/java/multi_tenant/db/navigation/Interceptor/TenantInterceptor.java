@@ -41,13 +41,12 @@ public class TenantInterceptor implements HandlerInterceptor {
 		String authHeader = request.getHeader("Authorization");
 
 		if (authHeader == null && shopName == null) {
-			logger.warn("Shop-name header is missing");
-			TenantContext.setCurrentTenant("default");
-			TenantContext.clear();
+			getGlobalTenant();
 			return true;
 		}
 
 		if (shopName != null) {
+			//no JWT
 			if (authHeader == null) {
 				System.out.println("Interceptor: " + shopName);
 
@@ -56,37 +55,32 @@ public class TenantInterceptor implements HandlerInterceptor {
 
 				logger.info("Tenant set to: {}", databaseName);
 				return true;
-				
-			}else if (authHeader != null && authHeader.startsWith("Bearer ")) {
+
+			} //with JWT
+			else if (authHeader != null && authHeader.startsWith("Bearer ")) {
 				String token = authHeader.substring(7);
 
 				Claims claims = jwtTokenProvider.validateToken(token);
 				String email = claims.getSubject();
-				Object roleObject = claims.get("roles");
-
-				if (roleObject == null) {
-					response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-					response.getWriter().write("{\"error\": \"Role is not found\"}");
+				List<String> roles = extractRoles(claims);
+				if (roles == null) {
+					sendForbiddenResponse(response, "Role is not found");
 					return false;
 				}
-
-				// convert <String,Object> roles as a object to String
-				ObjectMapper objectMapper = new ObjectMapper();
-				List<String> roles = objectMapper.convertValue(claims.get("roles"), new TypeReference<List<String>>() {
-				});
-
+				
+				System.out.println("Owner roles" + roles.toString());
 				if (roles.contains("OWNER")) {
 					Owner owner = ownerService.getOwnerByEmail(email);
 					// check if Owners has ShopName
-					for (Tenant tenant : owner.getTenants()) {
+					List<Tenant> tenants = tenantService.getTenantsByOwnerId(owner.getId());
+					for (Tenant tenant : tenants) {
 						if (tenant.getName().equals(shopName)) {
 							TenantContext.setCurrentTenant(tenant.getDbName());
 							return true;
 						}
 					}
 					// wont come to controller
-					response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-					response.getWriter().write("{\"error\": \"Tenant is not found\"}");
+					sendForbiddenResponse(response, "Tenant is not found");
 					return false;
 				} else { // roles not contains OWNERS
 					System.out.println("Interceptor: " + shopName);
@@ -97,9 +91,7 @@ public class TenantInterceptor implements HandlerInterceptor {
 					logger.info("Tenant set to: {}", databaseName);
 				}
 			}
-
 		}
-
 		return true;
 	}
 
@@ -109,4 +101,25 @@ public class TenantInterceptor implements HandlerInterceptor {
 		TenantContext.clear();
 	}
 
+	private void getGlobalTenant() {
+		logger.warn("Shop-name header is missing");
+		TenantContext.setCurrentTenant("default");
+		TenantContext.clear();
+	}
+
+	// convert <String,Object> roles as a object to String
+	private List<String> extractRoles(Claims claims) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		Object roleObject = claims.get("roles");
+
+		if (roleObject == null)
+			return null;
+		return objectMapper.convertValue(roleObject, new TypeReference<List<String>>() {
+		});
+	}
+
+	private void sendForbiddenResponse(HttpServletResponse response, String message) throws IOException {
+		response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+		response.getWriter().write("{\"error\": \"" + message + "\"}");
+	}
 }
