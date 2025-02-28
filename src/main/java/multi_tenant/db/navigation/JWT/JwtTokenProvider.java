@@ -22,10 +22,10 @@ public class JwtTokenProvider {
 	private final long ACCESS_TOKEN_VALIDITY = 3600_000;
 	private final long REFRESH_TOKEN_VALIDITY = 7 * 24 * 3600_000;
 
-	public String generateToken(String email, List<String> role, long validity) {
+	public String generateToken(String email, List<String> roles, long validity) {
 		return Jwts.builder()			
 				.setSubject(email)
-				.claim("roles", role)
+				.claim("roles", roles)
 				.setIssuedAt(new Date())
 				.setExpiration(new Date(System.currentTimeMillis() + validity))
 				.signWith(SECRET_KEY) 
@@ -33,12 +33,12 @@ public class JwtTokenProvider {
 
 	}
 
-	public String generateAccessToken(String email,List<String> role) {
-		return generateToken(email, role, ACCESS_TOKEN_VALIDITY);
+	public String generateAccessToken(String email,List<String> roles) {
+		return generateToken(email, roles, ACCESS_TOKEN_VALIDITY);
 	}
 
-	public String generateRefreshToken(String email, List<String> role) {
-		return generateToken(email,role, REFRESH_TOKEN_VALIDITY);
+	public String generateRefreshToken(String email, List<String> roles) {
+		return generateToken(email,roles, REFRESH_TOKEN_VALIDITY);
 	}
 
 	public Claims validateToken(String token) {
