@@ -21,17 +21,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "developers", schema = "global_multi_tenant")
+@Table(name = "developers", schema = "db_navigation_global_multi_tenant")
 public class Developer {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name="first_name",nullable = false, unique = true, length = 45)
+	@Column(name="first_name",nullable = false, unique = false, length = 45)
 	private String firstName;
 
-	@Column(name="last_name",nullable = false, unique = true, length = 45)
+	@Column(name="last_name",nullable = false, unique = false, length = 45)
 	private String lastName;
 	
 	@Column(nullable = false, unique = true, length = 100)
@@ -41,7 +41,7 @@ public class Developer {
 	private String password;
 
 	@Enumerated(EnumType.STRING)
-	@Column
+	@Column(name="role", nullable=false)
 	private Role role;
 
 	@Column(name = "created_at")
