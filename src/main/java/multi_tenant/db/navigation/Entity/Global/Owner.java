@@ -30,7 +30,7 @@ import multi_tenant.db.navigation.Enum.Status;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "owners", schema = "global_multi_tenant")
+@Table(name = "owners", schema = "db_navigation_global_multi_tenant")
 public class Owner {
 
 	@Id
