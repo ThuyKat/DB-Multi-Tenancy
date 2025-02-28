@@ -24,7 +24,7 @@ import multi_tenant.db.navigation.Enum.Status;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tenants", schema = "global_multi_tenant")
+@Table(name = "tenants", schema = "db_navigation_global_multi_tenant")
 public class Tenant {
 	@Id
 	@GeneratedValue (strategy = GenerationType.IDENTITY)
@@ -54,7 +54,7 @@ public class Tenant {
 	
 	@Enumerated(EnumType.STRING)
 	@Column (name = "owner_role")
-	private Role role;
+	private Role ownerRole;
 	
 	public enum Role {
 		OWNER, ADMIN
