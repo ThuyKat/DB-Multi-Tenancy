@@ -1,5 +1,6 @@
 package multi_tenant.db.navigation.Controller;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,9 +30,9 @@ public class UserController {
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 	
 	@GetMapping("/user")
-	public ResponseEntity<Object> getUser(@RequestHeader("shop-name") String shopName, @RequestParam String email ){
-		System.out.println("Shop name: " + shopName);
-		User user = userService.getUserByEmail(email);	
+	public ResponseEntity<Object> getUser(@RequestHeader("shop-name") String shopName, Principal principal ){
+		System.out.println("Shop name: " + shopName);		
+		User user = userService.getUserByEmailWithPermission(principal.getName());	
 		
 		//hibernate proxy, not fully loaded
 		List<String> permissionList = user.getRole().getPermissions()

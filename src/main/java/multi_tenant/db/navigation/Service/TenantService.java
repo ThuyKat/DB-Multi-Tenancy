@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -42,6 +43,11 @@ public class TenantService {
 	}
 	public Tenant getDatabaseNameByShopId(String shopName) {
 		return tenantRepository.findByName(shopName);
+	}
+	
+	public List<Tenant> getTenantsByOwnerId(Long ownerId){
+		List<Tenant> tenants = tenantRepository.findByOwnerId(ownerId);
+		return tenants.isEmpty() ? Collections.emptyList() : tenants;
 	}
 	
 	@Transactional(transactionManager = "globalTransactionManager", propagation = Propagation.REQUIRES_NEW) //to rollback if error occurs

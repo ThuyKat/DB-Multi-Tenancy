@@ -1,4 +1,4 @@
-CREATE TABLE `global_multi_tenant`.`developers` (
+CREATE TABLE `db_navigation_global_multi_tenant`.`developers` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `first_name` VARCHAR(45) NOT NULL,
   `last_name` VARCHAR(45) NOT NULL,
