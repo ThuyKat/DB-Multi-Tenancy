@@ -57,7 +57,7 @@ public class OwnerController {
 				"TenantList", tenantResponse), HttpStatus.OK);
 	}
 	
-	@PreAuthorize("hasAnyRole('OWNER','ADMIN)")
+	@PreAuthorize("hasAnyRole('OWNER','ADMIN')")
 	@GetMapping("/admin/user-list")
 	public ResponseEntity<Object> getUserList(){
 		List<User> users = userService.getAllUsers();
