@@ -1,6 +1,7 @@
 package multi_tenant.db.navigation.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import multi_tenant.db.navigation.Entity.Global.Owner;
@@ -13,6 +14,7 @@ public class OwnerService {
 	private OwnerRepository ownerRepository;
 	
 	public Owner getOwnerByEmail(String email) {
-		return ownerRepository.findByEmail(email);
+		return ownerRepository.findByEmail(email)
+				.orElseThrow(() -> new UsernameNotFoundException("Owner not found: " + email));
 	}
 }
